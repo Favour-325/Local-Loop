@@ -1,19 +1,32 @@
-import { useState } from "react"
-import { useAuth } from "../../AuthContext";
-import { api_update } from "../../api";
+import { useState, useEffect } from "react"
+//import { useAuth } from "../../AuthContext";
+import { api_update, api_authenticate } from "../../api";
 
 import Styles from "../styles/styles";
 
 function ProfileDetails(props) {
-    const { user } = useAuth();
+    //const { user } = useAuth();
 
-    const [userDetails, setUserDetails] = useState({
-        first_name: user?.first_name || "",
-        last_name: user?.last_name || "",
-        email: user?.email || "",
-        phone: user?.phone || "",
-        address: user?.address || "",
-    })
+    const [user, setUser] = useState(null);
+
+    const getUser = async () => {
+        const response = await api_authenticate();
+        setUser(response.data);
+        console.log("User", user);
+    }
+    
+    useEffect(() => {
+        getUser();
+    }, [])
+
+    const [userDetails, setUserDetails] = useState(
+        {
+            first_name: user?.first_name || "",
+            last_name: user?.last_name || "",
+            email: user?.email || "",
+            phone: user?.phone || "",
+            address: user?.address || "",
+    });
 
     const handleChange = (e) => {
         setUserDetails({...userDetails, [e.target.name]: e.target.value}); 
@@ -26,11 +39,11 @@ function ProfileDetails(props) {
             const newData = response.data;
 
             setUserDetails({
-                first_name: newData.first_name,
-                last_name: newData.last_name,
-                email: newData.email,
-                phone: newData.phone,
-                address: newData.address,
+                first_name: newData.first_name || "",
+                last_name: newData.last_name || "",
+                email: newData.email || "",
+                phone: newData.phone || "",
+                address: newData.address || "",
             });
             alert("Update successful", response.data);
         } catch (error) {
@@ -96,15 +109,15 @@ function ProfileDetails(props) {
                         <div className="row row-cols-1 row-cols-md-2 mx-auto gap-2 justify-content-center">
                             <div className="col align-self-center fw-bolder fs-1 shadow-sm" style={Styles.avater}>FT</div>
                             <div className="col ">
-                                <h5 className='fw-bold fs-3'>{user.first_name} {user.last_name}</h5>
+                                <h5 className='fw-bold fs-3'>{user?.first_name || ""} {user?.last_name || ""}</h5>
                                 <div>
-                                    <i className='bi bi-envelope me-2' title="email"></i><p className='d-inline-block'>{user.email}</p>
+                                    <i className='bi bi-envelope me-2' title="email"></i><p className='d-inline-block'>{user?.email || ""}</p>
                                 </div>
                                 <div>
-                                    <i className='bi bi-telephone me-2' title="telephone"></i><p className='d-inline-block'>{user.phone}</p>
+                                    <i className='bi bi-telephone me-2' title="telephone"></i><p className='d-inline-block'>{user?.phone || ""}</p>
                                 </div>
                                 <div>
-                                    <i className='bi bi-geo-alt-fill me-2' title="address"></i><p className='d-inline-block'>{user.address}</p>
+                                    <i className='bi bi-geo-alt-fill me-2' title="address"></i><p className='d-inline-block'>{user?.address || ""}</p>
                                 </div>
                             </div>
                         </div>

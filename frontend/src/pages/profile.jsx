@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useParams, useMatch, Outlet } from 'react-router-dom';
-import { useAuth } from '../../AuthContext';
+import { api_authenticate } from '../../api';
+//import { useAuth } from '../../AuthContext';
 
 import Layout from './layout';
-import ProfileDetails from '../components/profile';
+//import ProfileDetails from '../components/profile';
 
 function Profile(props) {
-    const { user } = useAuth();
+    //const { user } = useAuth();
+    const [user, setUser] = useState("");
     const isProfileActive = useMatch('/account');
     const isActivitiesActive = useMatch('/account/activities/*');
+
+    const getUser = async () => {
+        const response = await api_authenticate();
+        setUser(response.data);
+        console.log("User", response.data);
+    }
+    
+    useEffect(() => {
+        getUser();
+    }, [])
 
     const Styles = {
         dropdown: {

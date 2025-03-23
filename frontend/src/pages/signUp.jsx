@@ -131,7 +131,7 @@ function SignUp() {
                                             <option >Select your City Council</option>
                                             {councils.map((council) => {
                                                 return (
-                                                    <option key={council.id} value={council.name} onClick={() => {setSelectedCouncil(council.name)}}>{council.name}</option>
+                                                    <option key={council.id} value={council.id} onClick={() => {setSelectedCouncil(council.id)}}>{council.name}</option>
                                                 )
                                             })}
                                         </select>

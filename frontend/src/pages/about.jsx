@@ -31,7 +31,7 @@ function About(props) {
                 <section className="container">
                     <div className=''>
                         <img src={pic1} alt="pic1" style={myStyle.imageFloat} className="shadow"/>
-                        <p>
+                        <p className="fw-light fs-5 lh-lg">
                             Lorem ipsum dolor sit amet consectetur, adipisicing elit. Placeat deleniti nulla impedit dicta deserunt aut illum, asperiores, amet porro reprehenderit nesciunt debitis quaerat est! Deleniti quas voluptatibus voluptatum doloremque et!
                             Illo ipsa odit quos placeat quaerat sint voluptas est quae possimus soluta. Magni suscipit sequi amet consequuntur incidunt corrupti nam deleniti veniam, odio quasi rem similique repellat alias explicabo eaque.
                             Accusantium incidunt nulla harum velit sunt, porro quis aspernatur quaerat ipsam dolore culpa ratione dolores, ex rem? Quas possimus rem nemo tempora est ratione aspernatur aliquam. Voluptatibus, nisi fugit? Ab?

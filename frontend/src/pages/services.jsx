@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { api_requestCreate } from '../../api';
-import { useAuth } from '../../AuthContext';
+import { useState, useEffect } from 'react';
+import { api_requestCreate, api_authenticate } from '../../api';
+import axios from 'axios';
+// import { useAuth } from '../../AuthContext';
 
 import pic1 from '../assets/pictures/pic1.jpg';
 import { Recycle, Electricity, RoadRepair, WaterSupply } from '../assets/icons';
@@ -11,13 +12,24 @@ import LocationSearch from '../components/LocationSearch';
 
 function Services(props) {
 
+    /* const [user, setUser] = useState(null);
+
+    const getUser = async () => {
+        const response = await api_authenticate();
+        setUser(response.data);
+        console.log("User", response.data);
+    }
+
+    useEffect(() => {
+        getUser();
+    }, []) */
+
     // const [services, setServices] = useState([]);
-    const { user } = useAuth();
     const [selectedService, setSelectedService] = useState({});
+    
     const [requestData, setRequestData] = useState({
         description: "",
         ref_image: null,
-        location: null
     });
     const [location, setLocation] = useState(null);
 
@@ -65,6 +77,13 @@ function Services(props) {
             return;
         }
 
+        const token = localStorage.getItem('access');
+        console.log(token);
+        if (!token) {
+            alert("You must be logged in to create a request");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("title", selectedService.title);
         formData.append("description", requestData.description);
@@ -72,15 +91,20 @@ function Services(props) {
         formData.append("location", location.name);
         
         try {
-            await api_requestCreate(formData);
-            alert("Request submitted successfully");
-            setRequestData({
-                description: "",
-                ref_image: null,
-            });
-            setLocation(null);
+            const response = await axios.post(
+                'http://127.0.0.1:8000/api/requests/',
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+            alert("Successful", response.data);
+            setRequestData({ description: "", ref_image: null });
         } catch (error) {
-            console.error("Request rejected", error.response?.data || error.messsage);
+            console.log("Request rejected", error.response?.data || error.messsage);
         }
 
     }
@@ -88,7 +112,7 @@ function Services(props) {
     return (
         <Layout>
             <div className="modal fade" id="requestForm" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby='requestService' tabIndex={-1} aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered ">
+                <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content">
                         <div className="modal-header">
                             <div className="">
@@ -101,9 +125,9 @@ function Services(props) {
 
                             <form id="userInformation">
 
-                                <div className='row g-3'>
+                                <div className='g-3 row'>
                                     <h5>Request Details</h5>
-                                    <p className='my-0 text-muted'>Please fill in the details to help us serve you better</p>
+                                    <p className='text-muted my-0'>Please fill in the details to help us serve you better</p>
 
                                     <div className="col-12">
                                         <label htmlFor="description" className='form-label'>Description of the Issue</label>
@@ -139,14 +163,14 @@ function Services(props) {
                         <div className="col display-4">
                             Solutions For Quality Living
                         </div>
-                        <div className="col lead align-self-center">
+                        <div className="col align-self-center lead">
                             Explore the ongoing and upcoming projects shaping the future of our community.
                         </div>
                     </div>
 
                     <hr className='opacity-1 pb-2'/>
 
-                    <div className="row g-4 row-cols-1 row-cols-md-2 row-cols-lg-4">
+                    <div className="g-4 row row-cols-1 row-cols-lg-4 row-cols-md-2">
                         {services.map((service) => {
                             const IconComponent = service.icon;
                             return (
@@ -159,7 +183,7 @@ function Services(props) {
                                             <p className="card-text">
                                                 {service.description}
                                             </p>
-                                            <a href="#" className="icon-link icon-link-hover text-decoration-none"
+                                            <a href="#" className="text-decoration-none icon-link icon-link-hover"
                                             role='button'
                                             data-bs-target="#requestForm" data-bs-toggle="modal"
                                             onClick={() => setSelectedService(service)}

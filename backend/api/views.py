@@ -2,6 +2,8 @@ from django.shortcuts import render
 from .models import *
 from .serializers import *
 from rest_framework import generics, status
+#from rest_framework.authentication import SessionAuthentication
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -18,7 +20,8 @@ def get_tokens_for_user(user):
     }
     
 # This class overrides the JWTAuthentication get_header function to get the tokens from the cookies instead of the headers.
-class CookieTokenAuthentication(JWTAuthentication):
+# Use during production
+""" class CookieTokenAuthentication(JWTAuthentication):
     def get_header(self, request):
         token = request.COOKIES.get("access_token")
         if token is None:
@@ -28,7 +31,7 @@ class CookieTokenAuthentication(JWTAuthentication):
     def get_raw_token(self, header):
         if header is None:
             return None
-        return header if isinstance(header, str) else header.decode("utf-8")
+        return header if isinstance(header, str) else header.decode("utf-8") """
 
 class CreateUserView(APIView):
     permission_classes = [AllowAny]
@@ -38,7 +41,7 @@ class CreateUserView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-class LoginView(APIView):
+""" class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
@@ -46,9 +49,9 @@ class LoginView(APIView):
         
         user = CustomUser.objects.filter(email=email).first()
         
-        """ user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=email, password=password)
         if user is None:
-            return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED) """
+            return Response({"error": "Invalid Credentials"}, status=status.HTTP_401_UNAUTHORIZED)
         
         if user is None:
             raise AuthenticationFailed('User does not exist')
@@ -74,9 +77,9 @@ class LoginView(APIView):
             samesite = 'None',
             secure=True,
         )
-        return response
+        return response """
     
-class RefreshTokenView(APIView):
+""" class RefreshTokenView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
@@ -100,7 +103,7 @@ class RefreshTokenView(APIView):
             return response
             
         except Exception:
-            return Response({"error": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Invalid or expired refresh token"}, status=status.HTTP_401_UNAUTHORIZED) """
         
 class LogoutView(APIView):
     def post(request):
@@ -110,7 +113,7 @@ class LogoutView(APIView):
         return response
     
 class UserView(APIView):
-    authentication_classes = [CookieTokenAuthentication]
+    # authentication_classes = [CookieTokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
@@ -123,55 +126,42 @@ class UserView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 class CouncilView(generics.ListAPIView):
+    queryset = Council.objects.all()
     serializer_class = CouncilSerializer
     permission_classes = [AllowAny]
     
-    def get_queryset(self):
-        return Council.objects.all()
-    
 class RequestView(generics.ListCreateAPIView):
+    queryset = Requests.objects.all()
     serializer_class = RequestSerializers
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
-        return Requests.objects.filter(author=self.request.user)
+    def get_serializer_context(self):
+        return {
+            'request': self.request
+        }
     
-    # This is soo beautiful ! Django Generic Views are the best
-    def perform_create(self, serializer):
-        user = self.request.user
-        
-        if not user.council:
-            raise serializers.ValidationError("User is not associated with any council")
-        
-        serializer.save(author=user, council=self.request.user.council)
+class RequestRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Requests.objects.all()
+    serializer_class = RequestSerializers
+    permission_classes = [IsAuthenticated]
         
 class ServicesView(generics.ListAPIView):
+    queryset = Services.objects.all()
     serializer_class = ServicesSerializer
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
-        return Services.objects.filter(council=self.request.council)
-        
 class ProjectsView(generics.ListAPIView):
+    queryset = Projects.objects.all()
     serializer_class = ProjectSerializer
     permission_classes = [IsAuthenticated]
     
-    def get_queryset(self):
-        return Projects.objects.filter(council=self.request.council)
-    
 class ContributionView(generics.ListCreateAPIView):
+    queryset = Contributions.objects.all()
     serializer_class = ContributionSerializers
     permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        return Contributions.objects.filter(author=self.request.user)
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
         
 class FeedbackView(generics.CreateAPIView):
+    queryset = Feedbacks.objects.all()
     serializer_class = FeedbacksSerializers
     permission_classes = [IsAuthenticated]
     
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)

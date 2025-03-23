@@ -1,9 +1,24 @@
 import axios from "axios";
+//import Cookies from "js-cookie";
 
-const API = axios.create({
+export const API = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true, // Important for sending cookies
+    // withCredentials: true, // Important for sending cookies
 });
+
+API.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("access"); // Check if we have an access token then add that as an authorization header to our request, else nothing to do
+
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 export const api_register = async (userData) => {
     return await API.post('api/register/', userData, {
@@ -15,12 +30,17 @@ export const api_register = async (userData) => {
 };
 
 export const api_login = async (userData) => {
-    return await API.post('api/login/', userData, {
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
-    });
+    try {
+        const response = await API.post('api/token/', userData);
+        const { access, refresh } = response.data;
+
+        localStorage.setItem("access", access);
+        localStorage.setItem("refresh", refresh);
+
+        return response;
+    } catch (error) {
+        console.error("Login failed", error.response?.data || error.message);
+    }
 };
 
 export const api_authenticate = async () => {
@@ -28,7 +48,11 @@ export const api_authenticate = async () => {
 };
 
 export const api_update = async () => {
-    return await API.patch('api/auth/me/');
+    return await API.patch('api/auth/me/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    });
 };
 
 export const api_refreshToken = async () => {
@@ -40,7 +64,7 @@ export const api_logout = async () => {
 };
 
 export const api_councilList = async () => {
-    return await API.get('api/council/list')
+    return await API.get('api/council/list');
 }
 
 // Get the list of requests made by a user
@@ -49,10 +73,11 @@ export const api_requestList = async () => {
 }
 
 export const api_requestCreate = async (formData) => {
+    //const csrfToken = Cookies.get("csrftoken");
     return await API.post('api/requests/', formData, {
         headers: {
             "Content-Type": "multipart/form-data",
-            "Accept": "application/json"
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
         }
     })
 }

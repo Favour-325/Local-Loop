@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useAuth } from "../../AuthContext.jsx";
+// import { useAuth } from "../../AuthContext.jsx";
+import { api_login } from "../../api";
 import { useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 import logo from '../assets/pictures/logo1.png';
 
@@ -15,7 +17,7 @@ function Login() {
         email: "",
         password: "",
     });
-    const { login } = useAuth();
+    // const { login } = useAuth();
     const [errors, setErrors] = useState({});
     const navigate = useNavigate();
 
@@ -48,9 +50,15 @@ function Login() {
         // The statement Object.keys(<object>) returns an array of the keys of the object in <object>
         if (Object.keys(validationErrors).length === 0) {
             try {
-                await login(credentials);
-                
-                navigate("/home");
+                //await login(credentials);
+
+                const response = api_login(credentials);
+
+                if (response) {
+                    alert("Successful");
+                    
+                    navigate("/home");
+                }
                 
             } catch (error) {
                 alert(error);
