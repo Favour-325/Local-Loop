@@ -12,25 +12,29 @@ import LocationSearch from '../components/LocationSearch';
 
 function Services(props) {
 
-    /* const [user, setUser] = useState(null);
-
-    const getUser = async () => {
-        const response = await api_authenticate();
-        setUser(response.data);
-        console.log("User", response.data);
-    }
+    const [requestData, setRequestData] = useState({
+        author: null,
+        description: "",
+        ref_image: null,
+        council: null
+    });
 
     useEffect(() => {
-        getUser();
-    }, []) */
+        (async () => {
+            try {
+                const response = await api_authenticate();
+                setRequestData({ author: response?.data.id, council: response?.data.council });
+                console.log("User data:", Number(response?.data.id));
+            } catch (error) {
+                console.error("Error fetching user data:", error.response?.data || error.message);
+            }
+        })();
+    }, [])
 
     // const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState({});
     
-    const [requestData, setRequestData] = useState({
-        description: "",
-        ref_image: null,
-    });
+    
     const [location, setLocation] = useState(null);
 
     // Once created, get the list of services from the database
@@ -77,30 +81,15 @@ function Services(props) {
             return;
         }
 
-        const token = localStorage.getItem('access');
-        console.log(token);
-        if (!token) {
-            alert("You must be logged in to create a request");
-            return;
-        }
-
         const formData = new FormData();
+        formData.append("author", Number(requestData.author));
         formData.append("title", selectedService.title);
         formData.append("description", requestData.description);
         formData.append("ref_image", requestData.ref_image);
         formData.append("location", location.name);
         
         try {
-            const response = await axios.post(
-                'http://127.0.0.1:8000/api/requests/',
-                formData,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
+            const response = await api_requestCreate(formData);
             alert("Successful", response.data);
             setRequestData({ description: "", ref_image: null });
         } catch (error) {
@@ -124,7 +113,6 @@ function Services(props) {
                         <div className="modal-body">
 
                             <form id="userInformation">
-
                                 <div className='g-3 row'>
                                     <h5>Request Details</h5>
                                     <p className='text-muted my-0'>Please fill in the details to help us serve you better</p>
@@ -148,7 +136,7 @@ function Services(props) {
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
+                            <button type="submit" className="btn btn-primary" onClick={handleSubmit} data-bs-dismiss="modal">Submit</button>
                         </div>
                     </div>
                 </div>

@@ -6,20 +6,21 @@ import PageFooter from './PageFooter';
 import "../styles/AuthPage.css";
 
 import pic1 from '../assets/pictures/pic1.jpg';
+import { api_contribCreate, api_getProject, api_authenticate } from '../../api';
 
 function ProjectViewer(props) {
     const location = useLocation();
-    const [projectData, setProjectData] = useState({ title: "", content: "", date: "" });
-    const date = new Date();
+    const [projectData, setProjectData] = useState({});
     const [formData, setFormData] = useState({
+        author: null,
+        project: null,
         contrib_type: "",
-        amount: "",
+        amount: null,
         time_commit: "",
         description: "",
-        pref_contact: "",
-        availability: "",
         add_comments: "",
     });
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -29,19 +30,68 @@ function ProjectViewer(props) {
         }))
     }
 
-    const getQueryParams = () => {
-        const params = new URLSearchParams(location.search);
-        
-        return {
-            id: params.get('id'),
-            title: params.get('title')
-        };
+    const getProjectDetails = async (id) => {
+        const response = await api_getProject(id);
+        return response.data;
     };
 
     useEffect(() => {
-        // Use the id to make a request to get the project details before passing to the projectData.
-        setProjectData(getQueryParams());
-    }, [location.search]);
+        const projectId = new URLSearchParams(location.search).get('id');
+        setFormData({...formData, project: projectId});
+        if (formData.project) {
+            (async () => {
+                try {
+                    const response = await getProjectDetails(projectId);
+                    setProjectData(response);
+                    const res = await api_authenticate();
+                    setFormData({...formData, author: res?.data.id});
+                } catch (error) {
+                    console.error("Failed to fetch data:", error);
+                }
+            })();
+        } else {
+            console.error("Invalid Project ID");
+        }
+    }, [formData.project]);
+
+    const validationTest = () => {
+        const newErrors = {};
+
+        if (!formData.contrib_type) {
+            newErrors.contribType = "Please select a contribution type";
+        } else if (formData.contrib_type === "Financial" && !formData.amount) {
+            newErrors.amount = "Please specify your amount";
+        } else if ((formData.contrib_type === "Volunteering" || formData.contrib_type === "Skills") && !formData.time_commit) {
+            newErrors.timeCommit = "Please specify how much time you'll like to commit";
+        } else if ((formData.contrib_type === "Volunteering" || formData.contrib_type === "Skills") && !formData.description) {
+            newErrors.description = "Please provide details about your contribution";
+        }
+
+        return newErrors;
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const validationErrors = validationTest();
+        if (Object.keys(validationErrors).length === 0) {
+            setErrors({});
+            try {
+                console.log(formData);
+                api_contribCreate(formData);
+                alert("Contribution Created Successfully!");
+            } catch (error) {
+                console.error("Failed to create contribution", error.response?.error || error.message);
+            }
+        } else {
+            setErrors(validationErrors);
+        }
+    }
+
+    const stateColorMap = {
+        "Future": "secondary",
+        "Ongoing": "primary",
+        "Completed": "success"
+    };
 
     return (
         <div>
@@ -56,74 +106,72 @@ function ProjectViewer(props) {
                             <button className='btn-close' type='button' data-bs-dismiss="modal" aria-label='close'></button>
                         </div>
                         <div className="modal-body">
-                            <div className="row g-3">
-                                <div className="col-12">
-                                    <label htmlFor="#contrib_type" className="form-label">In what way will you like to contribute?</label>
-                                    <select id="contrib_type" name="contrib_type" className='form-select' value={formData.contrib_type} onChange={handleChange}>
-                                        <option>Choose...</option>
-                                        <option value="Financial">Financial Support</option>
-                                        <option value="Volunteering">Volunteering</option>
-                                        <option value="Resources">Providing Resources (e.g. Materials, Tools,..)</option>
-                                        <option value="Skills">Offering Expertise/Skills</option>
-                                        <option value="Other">Other (Please Specify)</option>
-                                    </select>
-                                </div>
-                                {formData.contrib_type === "Financial" && (
-                                    <div className='col-12'>
-                                        <label htmlFor="amount" className='form-label'>How much will you like to contribute financially?</label>
-                                        <input type="number" min={5000} step={500} className='form-control' value={formData.amount} onChange={handleChange}/>
+
+                            <form id="userContribution">
+                                <div className="row g-3">
+                                    <div className="col-12">
+                                        <label htmlFor="#contrib_type" className="form-label">In what way will you like to contribute?</label>
+                                        <select id="contrib_type" name="contrib_type" className='form-select' value={formData.contrib_type} onChange={handleChange}>
+                                            <option>Choose...</option>
+                                            <option value="Financial">Financial Support</option>
+                                            <option value="Volunteering">Volunteering</option>
+                                            <option value="Resources">Providing Resources (e.g. Materials, Tools,..)</option>
+                                            <option value="Skills">Offering Expertise/Skills</option>
+                                            <option value="Other">Other (Please Specify)</option>
+                                        </select>
+                                        {errors.contribType && <span className="small text-danger">{errors.contribType}</span>}
                                     </div>
-                                )}
 
-                                {(formData.contrib_type === "Volunteering" || formData.contrib_type === "Skills") && (
-                                    <div className='col-12'>
-                                        <fieldset className='row'>
-                                            <legend className='col-form-label'>How much time can you dedicate?</legend>
-                                            <div className="col-sm-10">
-                                                <div className="form-check">
-                                                    <input type="radio" className='form-check-input' name='time_commit' id='once' value={formData.time_commit}/>
-                                                    <label htmlFor="once" className='form-check-label'>Once</label>
+                                    {formData.contrib_type === "Financial" && (
+                                        <div className='col-12'>
+                                            <label htmlFor="amount" className='form-label'>How much will you like to contribute financially?</label>
+                                            <input type="number" min={5000} step={500} className='form-control' name="amount" value={formData.amount} onChange={handleChange}/>
+                                            {errors.amount && <span className="small text-danger">{errors.amount}</span>}
+                                        </div>
+                                    )}
+
+                                    {(formData.contrib_type === "Volunteering" || formData.contrib_type === "Skills") && (
+                                        <div className='col-12'>
+                                            <fieldset className='row'>
+                                                <legend className='col-form-label'>How much time can you dedicate?</legend>
+                                                <div className="col-sm-10">
+                                                    <div className="form-check">
+                                                        <input type="radio" className='form-check-input' name='time_commit' id='once' value="Once" onChange={handleChange}/>
+                                                        <label htmlFor="once" className='form-check-label'>Once</label>
+                                                    </div>
+                                                    <div className="form-check">
+                                                        <input type="radio" className="form-check-input" name='time_commit' id='weekly' value="Weekly" onChange={handleChange}/>
+                                                        <label htmlFor="weekly" className='form-check-label'>Weekly</label>
+                                                    </div>
+                                                    <div className="form-check">
+                                                        <input type="radio" className="form-check-input" name='time_commit' id='monthly' value="Monthly" onChange={handleChange}/>
+                                                        <label htmlFor="monthly" className='form-check-label'>Monthly</label>
+                                                    </div>
+                                                    <div className="form-check">
+                                                        <input type="radio" className="form-check-input" name='time_commit' id='asNeeded' value="As Required" onChange={handleChange}/>
+                                                        <label htmlFor="asNeeded" className='form-check-label'>As Required</label>
+                                                    </div>
                                                 </div>
-                                                <div className="form-check">
-                                                    <input type="radio" className="form-check-input" name='time_commit' id='weekly' value={formData.time_commit}/>
-                                                    <label htmlFor="weekly" className='form-check-label'>Weekly</label>
-                                                </div>
-                                                <div className="form-check">
-                                                    <input type="radio" className="form-check-input" name='time_commit' id='monthly' value={formData.time_commit}/>
-                                                    <label htmlFor="monthly" className='form-check-label'>Monthly</label>
-                                                </div>
-                                                <div className="form-check">
-                                                    <input type="radio" className="form-check-input" name='time_commit' id='asNeeded' value={formData.time_commit}/>
-                                                    <label htmlFor="asNeeded" className='form-check-label'>As Required</label>
-                                                </div>
-                                            </div>
-                                        </fieldset>
+                                            </fieldset>
+                                            {errors.timeCommit && <span className="small text-danger">{errors.timeCommit}</span>}
+                                        </div>
+                                    )}
+
+                                    {formData.contrib_type === "Financial" ? "" : (<div className="col-12">
+                                        <label htmlFor="description" className='form-label'>Let us know how you intend to contribute to this project</label>
+                                        <textarea style={{resize: 'none'}} className='form-control' name="description" id="description" maxLength={150} cols="30" rows="5" placeholder='Please provide details about your contribution' value={formData.description} onChange={handleChange}></textarea>
+                                        {errors.description && <span className="small text-danger">{errors.description}</span>}
+                                    </div>)}
+
+                                    <div className="col-12">
+                                        <textarea style={{resize: 'none'}} className='form-control' name="add_comments" id="add_comments" maxLength={150} cols="30" rows="5" placeholder='Any extra information you&apos;d like us to know?' value={formData.add_comments} onChange={handleChange}></textarea>
                                     </div>
-                                )}
-
-                                {formData.contrib_type === "Financial" ? "" : (<div className="col-12">
-                                    <label htmlFor="description" className='form-label'>Let us know how you intend to contribute to this project</label>
-                                    <textarea style={{resize: 'none'}} className='form-control' name="description" id="description" maxLength={150} cols="30" rows="5" placeholder='Please provide details about your contribution' value={formData.description} onChange={handleChange}></textarea>
-                                </div>)}
-
-                                <div className="col-12">
-                                    <label htmlFor="pref_contact" className="form-label">How should we contact you for follow-ups?</label>
-                                    <select id="pref_contact" name="pref_contact" className='form-select' value={formData.pref_contact} onChange={handleChange}>
-                                        <option value="Phone">Phone</option>
-                                        <option value="Email">Email</option>
-                                        <option value="WhatsApp">WhatsApp</option>
-                                    </select>
                                 </div>
-
-                                <div className="col-12">
-                                    <label htmlFor="add_comments" className='form-label'>Any extra information you&apos;d like us to know?</label>
-                                    <textarea style={{resize: 'none'}} className='form-control' name="add_comments" id="add_comments" maxLength={150} cols="30" rows="5" placeholder='' value={formData.add_comments} onChange={handleChange}></textarea>
-                                </div>
-                            </div>
+                            </form>
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" className="btn btn-primary">Submit</button>
+                            <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
                         </div>
                     </div>
                 </div>
@@ -137,28 +185,23 @@ function ProjectViewer(props) {
                     <div className="row my-3 row-cols-1 row-cols-md-2">
                         <div className="col col-md-5 d-flex flex-column justify-content-between">
                             <div>
-                                <h3 className='lead fw-bold fs-3'>{projectData.title}</h3>
-                                <p className='fw-light'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Error, minima? Eligendi, eius, veniam soluta repudiandae debitis nisi quos minus id sit magnam ab cupiditate neque voluptate voluptatum illum dolorem sint.</p>
-                                <p><strong>Location:</strong> Nouvelle-Route Bonabo</p>
-                                <p><strong>Start Date:</strong> {date.toLocaleDateString('en-GB')}</p>
-                                <span className="p-1 px-2 rounded-1 text-white fw-bold" style={{backgroundColor: "blue"}}>Active</span>
-                                <p className="text-muted mt-3">Last updated: {date.toLocaleString()}</p>
+                                <h3 className='lead fw-bold fs-3'>{projectData?.title}</h3>
+                                <p className='fw-light'>{projectData?.brief}</p>
+                                <p><strong>Location:</strong> {projectData?.location}</p>
+                                <p><strong>Start Date:</strong> {projectData?.start_date}</p>
+                                <span className={`p-1 px-2 rounded-1 text-bg-${stateColorMap[projectData?.status] || "secondary"} fw-bold`}>{projectData?.status}</span>
+                                <p className="text-muted mt-3">Last updated: {projectData?.updated_at}</p>
                             </div>
                             <div className="">
-                                
-                                <button className="btn mb-2 btn-primary w-100" data-bs-target='#contribForm' data-bs-toggle='modal'>Contribute</button>
+                                <button className={`btn mb-2 btn-primary w-100 ${projectData?.status === "Completed" && "disabled"}`} data-bs-target='#contribForm' data-bs-toggle='modal'>Contribute</button>
                             </div>
                         </div>
                         <div className="col col-md-7">
-                            <img src={pic1} alt="" className='img-fluid shadow-sm rounded-3'/>
+                            <img src={projectData.image?.media || pic1} alt="Project Image" className='img-fluid shadow-sm rounded-3'/>
                         </div>
                     </div>
                     <p className='fw-light fs-5 lh-lg'>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Molestiae ab accusantium pariatur incidunt repudiandae odio, ut officia architecto cupiditate recusandae cum, ipsam totam magni nostrum saepe autem debitis maxime. Neque.
-                        Suscipit nulla accusantium quam perspiciatis commodi exercitationem, deserunt modi architecto doloremque repellendus possimus sit error blanditiis eligendi explicabo quaerat soluta dolorum. Amet consectetur illo dolore est nam pariatur corrupti repellendus!
-                        Ab necessitatibus dignissimos, ipsam placeat error quo possimus incidunt mollitia qui eius consequuntur impedit atque temporibus illo dolorum saepe similique deleniti, voluptates accusantium repellendus culpa numquam nihil rerum libero. Ex.
-                        Numquam nesciunt assumenda aut possimus quidem, consectetur, sit dolore dignissimos earum rerum repellendus maiores unde in expedita harum blanditiis? Aliquam odio omnis cum quis sed vitae reprehenderit, amet magnam expedita?
-                        Quaerat saepe, ducimus esse blanditiis a reprehenderit eveniet! Animi harum doloremque alias, id consequuntur voluptate! Consequuntur cupiditate quisquam officia voluptatibus. Molestias veritatis doloremque incidunt laboriosam eos ab odit est odio!
+                        {projectData.text}
                     </p>
                 </div>
 
@@ -167,7 +210,7 @@ function ProjectViewer(props) {
                         <div className="col">
                             <label htmlFor="feedback" className='form-label'>
                                 <h1>
-                                    Tell us what You have in Mind about this Project
+                                    Tell Us What You Think About This Project
                                 </h1>
                             </label>
                         </div>

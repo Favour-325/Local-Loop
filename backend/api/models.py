@@ -5,21 +5,20 @@ from django.contrib.auth.models import AbstractUser
 from .managers import CustomUserManager
 
 class Council(models.Model):
-    id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, unique=True)
     location = models.CharField(max_length=100)
-    phone = models.CharField(max_length=17)
-    email = models.EmailField(max_length=100)
-    hours = models.CharField(max_length=100)
+    phone = models.CharField(max_length=21)
+    email = models.EmailField()
+    hours = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
 class CustomUser(AbstractUser):
     phone = models.CharField(max_length=25, unique=True, blank=True, null=True)
     username = None
     email = models.EmailField(unique=True)
     address = models.TextField(max_length=100, blank=True, null=True)
-    council = models.ForeignKey(Council, related_name="userCouncil", on_delete=models.CASCADE, blank=True, null=True)
+    user_council = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -32,7 +31,7 @@ class Services(models.Model):
     title = models.CharField(max_length=100, unique=True)
     description = models.CharField(max_length=100)
     icon = models.CharField(max_length=100)
-    council = models.ForeignKey(Council, related_name="servicesCouncil", on_delete=models.CASCADE, blank=True, null=True)
+    council = models.ForeignKey(Council, related_name="councilServices", on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -49,7 +48,11 @@ class ProjectImages(models.Model):
 class Projects(models.Model):
     title = models.CharField(max_length=100, unique=True)
     image = models.ForeignKey(ProjectImages, related_name="projectImages", on_delete=models.CASCADE)
+    location = models.CharField(max_length=100)
+    brief = models.CharField(max_length=300)
     text = models.TextField()
+    council = models.ForeignKey(Council, related_name="councilProjects", on_delete=models.SET_NULL, blank=True, null=True)
+    
     start_date = models.DateField()
     end_date = models.DateField()
     duration = models.IntegerField(editable=False, blank=True, null=True)
@@ -59,7 +62,6 @@ class Projects(models.Model):
         ('Future', 'Future')
     ]
     status = models.CharField(max_length=20, choices=STATUS)
-    council = models.ForeignKey(Council, related_name="councilProjects", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -78,7 +80,6 @@ class Projects(models.Model):
             
         super().save(*args, **kwargs)
 
-
 class Requests(models.Model):
     author = models.ForeignKey(CustomUser, related_name="requestAuthor", on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
@@ -90,13 +91,18 @@ class Requests(models.Model):
         ('Reviewed', 'Reviewed')
     ]
     status = models.CharField(max_length=20, choices=STATUS, default=STATUS[0][0])
-    council = models.ForeignKey(Council, related_name="councilRequests", on_delete=models.CASCADE)
+    council = models.ForeignKey(Council, related_name="councilRequests", on_delete=models.SET_NULL, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
 class Contributions(models.Model):
     author = models.ForeignKey(CustomUser, related_name="contributionAuthor", on_delete=models.CASCADE)
     project = models.ForeignKey(Projects, related_name="projectContributions", on_delete=models.CASCADE)
+    STATUS = [
+        ('Pending', 'Pending'),
+        ('Reviewed', 'Reviewed')
+    ]
+    status = models.CharField(max_length=20, choices=STATUS, default=STATUS[0][0])
     TYPE = [
         ("Financial", "Financial"),
         ("Volunteering", "Volunteering"),
@@ -105,15 +111,9 @@ class Contributions(models.Model):
         ("Other", "Other")
     ]
     contrib_type = models.CharField(max_length=20, choices=TYPE)
-    amount = models.IntegerField()
-    time_commit = models.CharField(max_length=10)
-    description = models.CharField(max_length=150)
-    METHODS = [
-        ("Phone", "Phone"),
-        ("Email", "Email"),
-        ("WhatsApp", "WhatsApp")
-    ]
-    contact_method = models.CharField(max_length=20, choices=METHODS)
+    amount = models.IntegerField(blank=True, null=True)
+    time_commit = models.CharField(max_length=10, blank=True, null=True)
+    description = models.CharField(max_length=150, blank=True, null=True)
     add_comments = models.CharField(max_length=150, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -121,7 +121,6 @@ class Contributions(models.Model):
 class Feedbacks(models.Model):
     author = models.ForeignKey(CustomUser, related_name="feedbackAuthor", on_delete=models.CASCADE)
     content = models.CharField(max_length=150)
-    council = models.ForeignKey(Council, related_name="councilFeedbacks", on_delete=models.CASCADE)
+    project = models.ForeignKey(Projects, related_name="projectFeedbacks", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    

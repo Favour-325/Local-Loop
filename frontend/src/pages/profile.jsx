@@ -2,25 +2,24 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useParams, useMatch, Outlet } from 'react-router-dom';
 import { api_authenticate } from '../../api';
-//import { useAuth } from '../../AuthContext';
 
 import Layout from './layout';
-//import ProfileDetails from '../components/profile';
 
 function Profile(props) {
-    //const { user } = useAuth();
     const [user, setUser] = useState("");
     const isProfileActive = useMatch('/account');
     const isActivitiesActive = useMatch('/account/activities/*');
 
-    const getUser = async () => {
-        const response = await api_authenticate();
-        setUser(response.data);
-        console.log("User", response.data);
-    }
-    
     useEffect(() => {
-        getUser();
+        (async () => {
+            try {
+                const response = await api_authenticate();
+                setUser(response.data);
+                console.log("User data:", response.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error.response?.data || error.message);
+            }
+        })();
     }, [])
 
     const Styles = {
@@ -44,7 +43,7 @@ function Profile(props) {
         <Layout>
             <div className="container">
 
-                <h1 className='lead fw-bold fs-1 my-2'>Welcome {user.email} 👋,</h1>
+                <h1 className='lead fw-bold fs-1 my-2'>Welcome {user?.email} 👋,</h1>
                 <div className='row my-3 gap-5 justify-content-start'>
                     <div className="col-1 fs-5">
                         <Link 

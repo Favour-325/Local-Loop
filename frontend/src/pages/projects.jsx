@@ -1,16 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api_projects } from '../../api';
-import axios from 'axios';
 
 import pic2 from '../assets/pictures/pic2.jpg';
-import pic1 from '../assets/pictures/pic1.jpg';
-import pic3 from '../assets/pictures/pic3.jpg';
 
 import PageNavBar from '../components/PageNavBar';
 import PageFooter from '../components/PageFooter';
 import BlurHeader from '../styles/blurHeader';
-import { Arrow } from '../assets/icons';
 
 function Projects(props) {
 
@@ -19,12 +15,7 @@ function Projects(props) {
     useEffect(() => {
         const getProjects = async () => {
             try {
-                const token = localStorage.getItem('access');
-                const response = await axios.get('http://127.0.0.1:8000/api/projects/', {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+                const response = await api_projects();
                 setProjects(response.data);
                 console.log(projects);
             } catch (error) {
@@ -34,6 +25,12 @@ function Projects(props) {
 
         getProjects();
     }, []);
+
+    const stateColorMap = {
+        "Future": "secondary",
+        "Ongoing": "primary",
+        "Completed": "success"
+    };
 
     return (
         <body>
@@ -61,60 +58,29 @@ function Projects(props) {
                     <div className='pb-1' id="ongoingProjects">
                         <div className="g-2 row row-cols-2 row-cols-lg-3 row-cols-md-2">
 
-                            <div className="col d-flex project">
-                                <div className='card'>
-                                    <img src={pic2} alt="" className='card-img-top'/>
-                                    <div className="card-body">
-                                        <h5 className='card-title'>
-                                            Project Title
-                                        </h5>
-                                        <p className='card-text'>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores autem et ullam
-                                        </p>
-                                        <Link to={"/project?id=1&title=Project Title"}>
-                                            <a className='text-decoration-none fw-light' href="">Read more</a>
-                                        </Link>
+                            {projects.map((project) => {
+                                return (
+                                    <div key={project.id} className="col d-flex project">
+                                        <div className='card'>
+                                            <img src={project.image.media} alt="" className='card-img-top h-75'/>
+                                            <div className="card-body">
+                                                <h5 className='card-title'>
+                                                    {project.title}
+                                                </h5>
+                                                <span className={`badge text-bg-${stateColorMap[project.status] || "secondary"} rounded-5`}>{project.status}</span>
+                                                <p className='card-text fw-light' style={{fontSize: "14px"}}>
+                                                    {project.brief}
+                                                </p>
+                                                <Link to={`/project?id=${project.id}&title=${project.title}`}>
+                                                    <a className='text-decoration-none fw-light'>Read more</a>
+                                                </Link>
+                                            </div>
+
+                                        </div>
                                     </div>
-
-                                </div>
-                            </div>
-
-                            <div className="col d-flex project">
-                                <div className='card'>
-                                    <img src={pic1} alt="" className='card-img-top'/>
-                                    <div className="card-body">
-                                        <h5 className='card-title'>
-                                            Project Title
-                                        </h5>
-                                        <p className='card-text'>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores autem et ullam
-                                        </p>
-                                        <Link to={"/project?id=1&title=Project Title"}>
-                                            <a className='text-decoration-none fw-light' href="">Read more</a>
-                                        </Link>
-                                    </div>
-
-                                </div>
-                            </div>
+                                )
+                            })}
                             
-                            <div className="col d-flex project">
-                                <div className='card'>
-                                    <img src={pic1} alt="" className='card-img-top'/>
-                                    <div className="card-body">
-                                        <h5 className='card-title'>
-                                            Project Title
-                                        </h5>
-                                        <p className='card-text'>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Asperiores autem et ullam
-                                        </p>
-                                        <Link to={"/project?id=1&title=Project Title"}>
-                                            <a className='text-decoration-none fw-light' href="">Read more</a>
-                                        </Link>
-                                    </div>
-
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 

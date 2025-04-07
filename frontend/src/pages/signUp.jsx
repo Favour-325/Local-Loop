@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api_register, api_councilList } from "../../api.js";
+import { API } from "../../api.js";
 import { useNavigate } from "react-router-dom";
 
 import logo from '../assets/pictures/logo1.png';
@@ -58,11 +59,12 @@ function SignUp() {
         const validationErrors = validate();
         // The statement Object.keys(<object>) returns an array of the keys of the object in <object>
         if (Object.keys(validationErrors).length === 0) {
+            console.log(selectedCouncil);
             try {
-                const response = await api_register({
+                const response = await API.post('/api/register/', {
                     email, 
                     'password': conPassword,
-                    'council': selectedCouncil,
+                    'user_council': selectedCouncil,
                 }
             );
                 
@@ -131,7 +133,7 @@ function SignUp() {
                                             <option >Select your City Council</option>
                                             {councils.map((council) => {
                                                 return (
-                                                    <option key={council.id} value={council.id} onClick={() => {setSelectedCouncil(council.id)}}>{council.name}</option>
+                                                    <option key={council.id} value={council.id}>{council.name}</option>
                                                 )
                                             })}
                                         </select>

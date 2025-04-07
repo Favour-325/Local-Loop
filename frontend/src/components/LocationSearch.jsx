@@ -19,6 +19,11 @@ function LocationSearch({ onSelectLocation }) {
             setSuggestions(response.data);
         } catch (error) {
             console.error("Failed to fetch suggestions", error.response?.data || error.message);
+            setSuggestions([
+                "Douala",
+                "Yaounde",
+                "Bonapriso"
+            ])
         }
     }
 

@@ -6,11 +6,12 @@ export const API = axios.create({
     // withCredentials: true, // Important for sending cookies
 });
 
-API.interceptors.request.use(
+/* API.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("access"); // Check if we have an access token then add that as an authorization header to our request, else nothing to do
 
-        if (token) {
+        const publicEndpoints = ['/api/council/', '/api/user/register/', '/api/token/'];
+        if (token && !publicEndpoints.includes(config.url)) {
             config.headers.Authorization = `Bearer ${token}`
         }
         return config
@@ -18,7 +19,7 @@ API.interceptors.request.use(
     (error) => {
         return Promise.reject(error);
     }
-);
+); */
 
 export const api_register = async (userData) => {
     return await API.post('api/register/', userData, {
@@ -44,11 +45,15 @@ export const api_login = async (userData) => {
 };
 
 export const api_authenticate = async () => {
-    return await API.get('api/auth/me/');
+    return await API.get('api/auth/me/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    });
 };
 
-export const api_update = async () => {
-    return await API.patch('api/auth/me/', {
+export const api_update = async (id, userData) => {
+    return await API.patch(`api/profile/update/${id}`, {userData}, {
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("access")}`,
         }
@@ -56,7 +61,11 @@ export const api_update = async () => {
 };
 
 export const api_refreshToken = async () => {
-    return await API.post('api/token/refresh/', {});
+    return await API.post('api/token/refresh/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    });
 };
 
 export const api_logout = async () => {
@@ -64,17 +73,19 @@ export const api_logout = async () => {
 };
 
 export const api_councilList = async () => {
-    return await API.get('api/council/list');
+    return await API.get('api/council/list/');
 }
 
-// Get the list of requests made by a user
 export const api_requestList = async () => {
-    return await API.get('api/requests/')
+    return await API.get('api/requests/list/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
 }
 
 export const api_requestCreate = async (formData) => {
-    //const csrfToken = Cookies.get("csrftoken");
-    return await API.post('api/requests/', formData, {
+    return await API.post('api/requests/create/', formData, {
         headers: {
             "Content-Type": "multipart/form-data",
             "Authorization": `Bearer ${localStorage.getItem("access")}`,
@@ -84,22 +95,43 @@ export const api_requestCreate = async (formData) => {
 
 // Get the list of services related to a given council
 export const api_services = async () => {
-    return await API.get('api/services/')
+    return await API.get('api/services/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
 }
 
 // Get the list of projects related to a given council
 export const api_projects = async () => {
-    return await API.get('api/projects/')
+    return await API.get('api/projects/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
+}
+
+export const api_getProject = async (id) => {
+    return await API.get(`api/projects/${id}/`, {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
 }
 
 // Get the list of contributions made by a user
 export const api_contribList = async () => {
-    return await API.get('api/contributions/')
+    return await API.get('api/contributions/', {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
 }
 
 export const api_contribCreate = async (formData) => {
-    return await API.post('api/contributions/', formData, {
+    return await API.post('api/contributions/create/', formData, {
         headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
             "Content-Type": "application/json",
             "Accept": "application/json"
         }
@@ -109,6 +141,7 @@ export const api_contribCreate = async (formData) => {
 export const api_feedbacks = async (data) => {
     return await API.post('api/feedbacks/', data, {
         headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
             "Content-Type": "application/json",
         }
     })

@@ -1,14 +1,11 @@
-import { React, useEffect } from 'react';
-import Carousel from 'bootstrap/js/dist/carousel';
+import { React } from 'react';
 
 import PageNavBar from '../components/PageNavBar';
-import Styles from '../styles/styles';
 import PageFooter from '../components/PageFooter';
 import "../styles/AuthPage.css";
 
 import city1 from '../assets/pictures/city1.jpg';
 import road from '../assets/pictures/roads.jpg';
-import building from '../assets/pictures/building.jpg';
 import { Road, Sustain, Recycle, Electricity, RoadRepair, WaterSupply } from '../assets/icons';
 
 function Home(props) {

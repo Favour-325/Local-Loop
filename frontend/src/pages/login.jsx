@@ -49,6 +49,7 @@ function Login() {
         const validationErrors = validate();
         // The statement Object.keys(<object>) returns an array of the keys of the object in <object>
         if (Object.keys(validationErrors).length === 0) {
+            setErrors({});
             try {
                 //await login(credentials);
 

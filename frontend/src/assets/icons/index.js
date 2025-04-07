@@ -5,3 +5,6 @@ export { default as Recycle } from './recycle';
 export { default as Electricity } from './electricity';
 export { default as RoadRepair } from './roadRepair';
 export { default as Arrow } from './arrow';
+export { default as Community } from './community';
+export { default as Transparency } from './transparency';
+export { default as Active } from './active';
