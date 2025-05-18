@@ -57,15 +57,16 @@ MIDDLEWARE = [
 ]
 
 # Use during production
-# CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 # Use during production
 """ SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = True
-CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"] """
+CSRF_COOKIE_HTTPONLY = True"""
+
+#CSRF_ALLOWED_ORIGINS = ["http://localhost:5173"]
 
 # Change Default Authentication Class to SessionAuthentication later
 REST_FRAMEWORK = {
@@ -182,3 +183,12 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'api.CustomUser'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+EMAIL_HOST_USER = 'localloop.cmr.notify@gmail.com'
+EMAIL_HOST_PASSWORD = 'wmgz cnvv zpvn nlex'
+DEFAULT_FROM_EMAIL = 'localloop.cmr.notify@gmail.com'

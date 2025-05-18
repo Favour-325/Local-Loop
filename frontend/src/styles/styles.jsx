@@ -11,7 +11,7 @@ const Styles = {
     card: {
         backgroundColor: "lightGray",
         color: "#273746",
-        maxWidth: "450px"
+        maxWidth: "500px"
     },
 
     customContainer: {

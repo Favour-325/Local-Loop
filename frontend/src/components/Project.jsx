@@ -1,12 +1,13 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
 
 import PageNavBar from './PageNavBar';
 import PageFooter from './PageFooter';
 import "../styles/AuthPage.css";
 
 import pic1 from '../assets/pictures/pic1.jpg';
-import { api_contribCreate, api_getProject, api_authenticate } from '../../api';
+import { api_contribCreate, api_getProject, api_authenticate, api_feedbacks } from '../../api';
 
 function ProjectViewer(props) {
     const location = useLocation();
@@ -21,6 +22,7 @@ function ProjectViewer(props) {
         add_comments: "",
     });
     const [errors, setErrors] = useState({});
+    const [content, setContent] = useState("");
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -35,23 +37,27 @@ function ProjectViewer(props) {
         return response.data;
     };
 
+    // Executing this line outside a useEffect ensures that every render sees the projectId without relying on an effect
+    
     useEffect(() => {
         const projectId = new URLSearchParams(location.search).get('id');
-        setFormData({...formData, project: projectId});
-        if (formData.project) {
-            (async () => {
-                try {
-                    const response = await getProjectDetails(projectId);
-                    setProjectData(response);
-                    const res = await api_authenticate();
-                    setFormData({...formData, author: res?.data.id});
-                } catch (error) {
-                    console.error("Failed to fetch data:", error);
-                }
-            })();
-        } else {
-            console.error("Invalid Project ID");
-        }
+
+        if (!projectId) return console.error("Invalid Project ID");
+
+        setFormData(prev => ({...prev, project: projectId}));
+
+        console.log(formData.project);
+
+        (async () => {
+            try {
+                const response = await getProjectDetails(projectId);
+                setProjectData(response);
+                const res = await api_authenticate();
+                setFormData(prev => ({...prev, author: res?.data.id}));
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+            }
+        })();
     }, [formData.project]);
 
     const validationTest = () => {
@@ -70,21 +76,42 @@ function ProjectViewer(props) {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validationTest();
         if (Object.keys(validationErrors).length === 0) {
             setErrors({});
             try {
                 console.log(formData);
-                api_contribCreate(formData);
-                alert("Contribution Created Successfully!");
+                await api_contribCreate(formData);
+                toast.success("Contribution Created Successfully!");
             } catch (error) {
+                toast.error("Failed to create contribution");
                 console.error("Failed to create contribution", error.response?.error || error.message);
             }
         } else {
             setErrors(validationErrors);
         }
+    };
+
+    const sendFeedback = async (e) => {
+        e.preventDefault();
+
+        if (!content) {
+            toast.warning("You can't send a null content");
+        } else {
+            const projectId = new URLSearchParams(location.search).get('id');
+            try {
+                console.log(content);
+                await api_feedbacks(content, projectId);
+                toast.success("Feedback sent successfully!");
+                setContent("");
+            } catch (error) {
+                toast.error("Failed to send feedback");
+                console.error("Failed to send feedback", error?.response.data || error?.response.message)
+            }
+        }
+
     }
 
     const stateColorMap = {
@@ -206,7 +233,7 @@ function ProjectViewer(props) {
                 </div>
 
                 <div className='container py-1'>
-                    <div className="row row-cols-sm-1 row-cols-md-2">
+                    <div className="row row-cols-1 row-cols-md-2">
                         <div className="col">
                             <label htmlFor="feedback" className='form-label'>
                                 <h1>
@@ -215,7 +242,8 @@ function ProjectViewer(props) {
                             </label>
                         </div>
                         <div className="col">
-                            <textarea className='form-control' style={{resize:'none'}} name="feedback" id='feedback' maxLength={150} cols="30" rows="7" placeholder="Your Feedback here..."></textarea>
+                            <textarea className='form-control' style={{resize:'none'}} name="content" id='feedback' maxLength={150} cols="30" rows="7" placeholder="Your Feedback here..." value={content} onChange={(e) => setContent(e.target.value)}></textarea>
+                            <button className='btn btn-primary w-100 mt-1' onClick={sendFeedback}>Send</button>
                         </div>
                     </div>
                 </div>
@@ -225,6 +253,7 @@ function ProjectViewer(props) {
             <footer>
                 <PageFooter />
             </footer>
+            <ToastContainer />
         </div>
     );
 }

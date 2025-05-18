@@ -29,24 +29,26 @@ function Requests(props) {
             <div className="container mt-4 px-0">
                 <ul className="list-group list-group-flush">
 
-                    {requests.map((request) => (
+                    {requests.length === 0 ? (
+                        <li className="list-group-item text-center text-muted">You haven&apos;t made any request yet</li>
+                    ) : requests.map((request) => (
                         <li key={request.id} className="list-group-item px-0">
                             <div className="d-flex px-0 justify-content-between">
                                 <div className="col-auto d-flex flex-column">
                                     <div className="col">
                                         <span className="fw-bold me-3" style={{color: "#23486A"}}>{request.title}</span>
-                                        <span className={`badge rounded-pill text-bg-${stateColorMap[request.status] || "secondary"}`}><small>{request.status}</small></span>
                                     </div>
                                     <div className="col text-secondary">
                                         <small>{request.created_at}</small>
                                     </div>
                                 </div>
                                 <div className="col-auto align-self-center">
-                                    <i className="bi bi-three-dots-vertical ms-2 fs-4" data-bs-toggle="dropdown"></i>
+                                    {/* <i className="bi bi-three-dots-vertical ms-2 fs-4" data-bs-toggle="dropdown"></i>
                                     <ul className="dropdown-menu dropdown-menu-end">
                                         <li><Link className="dropdown-item" to="/project">Edit</Link></li>
                                         <li><Link className="dropdown-item" to="/project">Cancel</Link></li>
-                                    </ul>
+                                    </ul> */}
+                                    <span className={`badge rounded-pill text-bg-${stateColorMap[request.status] || "secondary"}`}><small>{request.status}</small></span>
                                 </div>
                             </div>
                         </li>

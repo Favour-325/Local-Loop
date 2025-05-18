@@ -15,11 +15,12 @@ function Projects(props) {
     useEffect(() => {
         const getProjects = async () => {
             try {
+                /* const user = await api_authenticate(); */
                 const response = await api_projects();
                 setProjects(response.data);
                 console.log(projects);
             } catch (error) {
-                alert('An error occurred while fetching projects', error.response?.data || error.message);
+                console.error('An error occurred while fetching projects', error.response?.data || error.message);
             }
         }
 
@@ -58,7 +59,11 @@ function Projects(props) {
                     <div className='pb-1' id="ongoingProjects">
                         <div className="g-2 row row-cols-2 row-cols-lg-3 row-cols-md-2">
 
-                            {projects.map((project) => {
+                            {projects.length === 0 ? (
+                                <div className="col d-flex justify-content-center align-items-center text-muted" style={{height: "60vh"}}>
+                                    <h3>No projects found</h3>
+                                </div>
+                            ) : projects.map((project) => {
                                 return (
                                     <div key={project.id} className="col d-flex project">
                                         <div className='card'>
@@ -79,8 +84,7 @@ function Projects(props) {
                                         </div>
                                     </div>
                                 )
-                            })}
-                            
+                            })}                          
                         </div>
                     </div>
 

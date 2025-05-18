@@ -64,6 +64,7 @@ class RequestSerializers(serializers.ModelSerializer):
         
 class ContributionSerializers(serializers.ModelSerializer):
     title = serializers.CharField(source='project.title', read_only=True)
+    project_id = serializers.CharField(source='project.id', read_only=True)
     created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
     class Meta:
         model = Contributions

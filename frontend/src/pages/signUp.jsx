@@ -71,15 +71,13 @@ function SignUp() {
                 // axios doesn't have .ok
                 if (response.status === 201) {
     
-                    alert("Successful");
-    
                     navigate("/login");
                     
                 } else {
                     navigate("/login")
                 }
             } catch (error) {
-                alert(error);
+                console.error(error);
             }
         } else {
             setErrors(validationErrors);
@@ -106,7 +104,7 @@ function SignUp() {
                             <div className="card-body">
                                 <div className="text-center">
                                     <img src={logo} alt="localloop" width={120} height={100}/>
-                                    <h2 className="card-title  fw-bolder lead">Welcome to LocalLoop 👋</h2>
+                                    <h2 className="card-title  fw-bolder lead">Welcome to LocalL<span className='text-primary'>oo</span>p</h2>
                                 </div>
                                 <form
                                 onSubmit={handleSubmit}
@@ -167,7 +165,7 @@ function SignUp() {
                                     </div>
 
                                     <div>
-                                        <button type="submit" className="btn btn-primary mt-3 w-100">Sign Up</button>
+                                        <button type="submit" className="btn btn-primary mt-3 w-100 round-">Sign Up</button>
                                         <p className="mt-2 text-center">Already have an account? <a href="/login">Sign In</a></p>
                                     </div>
                                 </form>

@@ -76,6 +76,14 @@ export const api_councilList = async () => {
     return await API.get('api/council/list/');
 }
 
+export const api_getCouncil = async (id) => {
+    return await API.get(`api/council/${id}/`, {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("access")}`,
+        }
+    })
+}
+
 export const api_requestList = async () => {
     return await API.get('api/requests/list/', {
         headers: {
@@ -138,8 +146,8 @@ export const api_contribCreate = async (formData) => {
     })
 }
 
-export const api_feedbacks = async (data) => {
-    return await API.post('api/feedbacks/', data, {
+export const api_feedbacks = async (content, project) => {
+    return await API.post('api/feedbacks/', {content, project}, {
         headers: {
             "Authorization": `Bearer ${localStorage.getItem("access")}`,
             "Content-Type": "application/json",

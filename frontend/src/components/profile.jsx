@@ -34,7 +34,7 @@ function ProfileDetails(props) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await api_update(userDetails.id, userDetails.remove("id"));
+            const response = await api_update(userDetails.id);
             const newData = response.data;
 
             setUserDetails({
@@ -44,9 +44,9 @@ function ProfileDetails(props) {
                 phone: newData?.phone || "",
                 address: newData?.address || "",
             });
-            alert("Update successful", response.data);
+            console.log("Update successful", response.data);
         } catch (error) {
-            alert("Update failed", error.response?.data || error.message);
+            console.error("Update failed", error.response?.data || error.message);
         }
     }
 
@@ -98,31 +98,41 @@ function ProfileDetails(props) {
                 </div>
             </div>
 
-            <div className="container d-flex justify-content-center align-content-center">
+            <div className="row justify-content-end">
+                <div className="col">
+                    <a href="/logout">
+                        <button type="button" className="btn text-secondary border">
+                            Logout
+                        </button>
+                    </a>
+                </div>
+            </div>
 
+            <div className="container d-flex justify-content-center align-content-center">
                 <div className="card shadow border-0 my-3 w-75" style={Styles.card}>
                     <div className="card-body">
                         <p className='text-end'>
-                            <i className='bi bi-pencil-square' title="Edit" type="button" data-bs-target="#profEditForm" data-bs-toggle="modal"></i>
+                            <i className='bi bi-pencil-square d-none' title="Edit" type="button" data-bs-target="#profEditForm" data-bs-toggle="modal"></i>
                         </p>
                         <div className="row row-cols-1 row-cols-md-2 mx-auto gap-2 justify-content-center">
-                            <div className="col align-self-center fw-bolder fs-1 shadow-sm" style={Styles.avater}>FT</div>
+                            <div className="col align-self-center fw-bolder fs-1 shadow-sm" style={Styles.avater}>
+                                <i className="bi bi-person-fill fs-1"></i>
+                            </div>
                             <div className="col ">
                                 <h5 className='fw-bold fs-3'>{userDetails?.first_name || ""} {userDetails?.last_name || ""}</h5>
                                 <div>
                                     <i className='bi bi-envelope me-2' title="email"></i><p className='d-inline-block'>{userDetails?.email || ""}</p>
                                 </div>
                                 <div>
-                                    <i className='bi bi-telephone me-2' title="telephone"></i><p className='d-inline-block'>{userDetails?.phone || ""}</p>
+                                    <i className='bi bi-telephone me-2' title="telephone"></i><p className='d-inline-block'>{userDetails?.phone || "+237 654-78-98-09"}</p>
                                 </div>
                                 <div>
-                                    <i className='bi bi-geo-alt-fill me-2' title="address"></i><p className='d-inline-block'>{userDetails?.address || ""}</p>
+                                    <i className='bi bi-geo-alt-fill me-2' title="address"></i><p className='d-inline-block'>{userDetails?.address || "Santa Barbarra, B'sadi"}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
             
         </div>

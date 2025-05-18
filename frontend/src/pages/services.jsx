@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api_requestCreate, api_authenticate } from '../../api';
-import axios from 'axios';
-// import { useAuth } from '../../AuthContext';
+import { ToastContainer, toast } from 'react-toastify';
 
 import pic1 from '../assets/pictures/pic1.jpg';
 import { Recycle, Electricity, RoadRepair, WaterSupply } from '../assets/icons';
@@ -29,13 +28,25 @@ function Services(props) {
                 console.error("Error fetching user data:", error.response?.data || error.message);
             }
         })();
-    }, [])
+    }, []);
 
-    // const [services, setServices] = useState([]);
     const [selectedService, setSelectedService] = useState({});
-    
-    
     const [location, setLocation] = useState(null);
+    const [errors, setErrors] = useState({});
+
+    const validate = () => {
+        const newErrors = {};
+
+        if (!requestData.description) {
+            newErrors.description = "Description is required";
+        } else if (requestData.description.length < 10) {
+            newErrors.description = "Description is too short";
+        } else if (location === null) {
+            newErrors.location = "Please specify a location";
+        }
+
+        return newErrors;
+    }
 
     // Once created, get the list of services from the database
     const services = [
@@ -76,27 +87,40 @@ function Services(props) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!requestData.description || !requestData.ref_image || !location) {
-            alert("Please Provide all required inputs.");
-            return;
-        }
 
-        const formData = new FormData();
-        formData.append("author", Number(requestData.author));
-        formData.append("title", selectedService.title);
-        formData.append("description", requestData.description);
-        formData.append("ref_image", requestData.ref_image);
-        formData.append("location", location.name);
-        
-        try {
-            const response = await api_requestCreate(formData);
-            alert("Successful", response.data);
-            setRequestData({ description: "", ref_image: null });
-        } catch (error) {
-            console.log("Request rejected", error.response?.data || error.messsage);
-        }
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length === 0) {
+            setErrors({});
 
+            const formData = new FormData();
+            formData.append("author", Number(requestData.author));
+            formData.append("title", selectedService.title);
+            formData.append("description", requestData.description);
+            formData.append("ref_image", requestData.ref_image);
+            formData.append("location", location.name);
+            
+            try {
+                await api_requestCreate(formData);
+                toast.success("Request Created Successfully!");
+                setRequestData({ description: "", ref_image: null});
+                setLocation(null);
+                setSelectedService({});
+
+            } catch (error) {
+                console.log("Request rejected", error.response?.data || error.messsage);
+                toast.error("Failed to create request");
+            }
+        } else {
+            setErrors(validationErrors);
+        }
     }
+
+    const handleClose = () => {
+        setRequestData({ description: "", ref_image: null, location: null });
+        setSelectedService({});
+        setLocation(null);
+        setErrors({});
+    };
 
     return (
         <Layout>
@@ -120,23 +144,25 @@ function Services(props) {
                                     <div className="col-12">
                                         <label htmlFor="description" className='form-label'>Description of the Issue</label>
                                         <textarea style={{resize: 'none'}} className='form-control' name="description" id="description" maxLength={150} cols="30" rows="5" placeholder='Provide a brief description of the Issue' value={requestData.description} onChange={handleChange}></textarea>
+                                        {errors.description && <span className="text-danger">{errors.description}</span>}
                                     </div>
 
                                     <div className="col-12">
-                                        <label htmlFor="ref_image" className='form-label'>Reference Images (Optional)</label>
+                                        <label htmlFor="ref_image" className='form-label'>Reference Image</label>
                                         <input type="file" className='form-control' name="ref_image" id="ref_image" onChange={handleChange}/>
                                     </div>
 
                                     <div className='col-12'>
                                         <label htmlFor="location" className='form-label'>Location</label>
                                         <LocationSearch onSelectLocation={setLocation}/>
+                                        {errors.location && <span className="text-danger">{errors.location}</span>}
                                     </div>
                                 </div>
                             </form>
                         </div>
                         <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" className="btn btn-primary" onClick={handleSubmit} data-bs-dismiss="modal">Submit</button>
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={handleClose}>Close</button>
+                            <button type="submit" className="btn btn-primary" onClick={handleSubmit}>Submit</button>
                         </div>
                     </div>
                 </div>
@@ -186,7 +212,9 @@ function Services(props) {
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </Layout>
+        
     )
 }
 

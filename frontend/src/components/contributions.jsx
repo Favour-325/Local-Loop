@@ -28,9 +28,11 @@ function Contributions(props) {
             <h3 className="lead fw-bold">My Contributions</h3>
 
             <div className="container mt-4 px-0">
-                <ul className="list-group list-group-flush">
-                    {contributions.map((contribution) => (
-                        <li key={contribution.id} className="list-group-item px-0">
+                {contributions.length === 0 ? (
+                    <p>You haven&apos;t made any contributions yet</p>
+                ) : contributions.map((contribution) => (
+                    <ul key={contribution.id} className="list-group list-group-flush">
+                        <li  className="list-group-item px-0">
                             <div className="d-flex px-0 justify-content-between">
                                 <div className="col-auto d-flex flex-column">
                                     <div className="col">
@@ -42,20 +44,20 @@ function Contributions(props) {
                                     </div>
                                 </div>
                                 <div className="col-auto align-self-center">
-                                    <Link className="text-decoration-none">
+                                    <Link className="text-decoration-none" to={`/project?id=${contribution.project_id}&title=${contribution.title}`}>
                                         <button className="btn border d-sm-none d-md-inline-block">View Project</button>
                                     </Link>
-                                    <i className="bi bi-three-dots-vertical ms-2 fs-4" data-bs-toggle="dropdown"></i>
+                                    <i className="bi bi-three-dots-vertical ms-2 fs-4 " data-bs-toggle="dropdown"></i>
                                     <ul className="dropdown-menu dropdown-menu-end">
-                                        <li><Link className="dropdown-item d-lg-none" to="/project">Details</Link></li>
-                                        <li><Link className="dropdown-item" to="/project">Edit Contribution</Link></li>
-                                        <li><Link className="dropdown-item d-lg-none" to="/project">View Project</Link></li>
+                                        {/* <li><Link className="dropdown-item d-lg-none" to="/project">Details</Link></li>
+                                        <li><Link className="dropdown-item" to="/project">Edit Contribution</Link></li> */}
+                                        <li><Link className="dropdown-item d-lg-none" to={`/project?id=${contribution.project_id}&title=${contribution.title}`}>View Project</Link></li>
                                     </ul>
                                 </div>
                             </div>
                         </li>
-                    ))}
-                </ul>
+                    </ul>
+                ))}
             </div>
         </div>
     );

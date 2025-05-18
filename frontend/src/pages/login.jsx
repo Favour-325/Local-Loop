@@ -51,15 +51,8 @@ function Login() {
         if (Object.keys(validationErrors).length === 0) {
             setErrors({});
             try {
-                //await login(credentials);
-
-                const response = api_login(credentials);
-
-                if (response) {
-                    alert("Successful");
-                    
-                    navigate("/home");
-                }
+                await api_login(credentials);
+                navigate("/home");
                 
             } catch (error) {
                 alert(error);
@@ -93,7 +86,7 @@ function Login() {
                             <div className="card-body">
                                 <div className="text-center">
                                     <img src={logo} alt="localloop" width={120} height={100}/>
-                                    <h2 className="card-title  fw-bolder lead">Welcome to LocalLoop 👋</h2>
+                                    <h2 className="card-title  fw-bolder lead">Welcome to LocalL<span className='text-primary'>oo</span>p</h2>
                                 </div>
                                 <form className="row" onSubmit={handleSubmit}>
                                     <div className="col-12 position-relative" style={Styles.inputGroup}>

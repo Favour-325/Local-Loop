@@ -6,6 +6,7 @@ urlpatterns = [
     #path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('council/list/', CouncilListView.as_view(), name='councils'),
+    path('council/<int:id>/', CouncilRetrieveView.as_view(), name='council_details'),
     path('auth/me/', UserView.as_view(), name='authentication'),
     path('profile/update/<int:id>', UpdateUserView.as_view(), name='updateProfile'),
     path('services/', ServicesView.as_view(), name='services'),

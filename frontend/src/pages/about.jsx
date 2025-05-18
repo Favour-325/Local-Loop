@@ -1,6 +1,6 @@
 import React from 'react';
 
-import city from '../assets/pictures/city.jpg';
+import about from '../assets/pictures/about.jpg';
 import { Community, Transparency, Active } from '../assets/icons';
 
 import PageNavBar from '../components/PageNavBar';
@@ -27,7 +27,7 @@ function About(props) {
                             </p>
                         </div>
                         <div className="col text-center" style={{ maxHeight:'660px' }}>
-                            <img src={city} alt="city" className="img-fluid object-fit-contain h-100 shadow rounded" />
+                            <img src={about} alt="about" className="img-fluid object-fit-contain h-100 shadow rounded" />
                         </div>
                     </div>
 

@@ -48,7 +48,7 @@ function Home(props) {
                     </div>
                     <div className="container" style={Styles.content}>
                         <h1 className='display-3 fw-bold'>Welcome to LocalLoop</h1>
-                        <p className='lead'>Stay Informed with the updates from your city council. Discover the ongoing projects that shape our community</p>
+                        <p className='lead'>Stay Informed with the updates from your city council. Discover and get engaged with the projects that shape your community.</p>
                         <div className='mt-5 d-lg-flex flex-sm-column flex-lg-row'>
                             <div className="col">
                                 <h6 className='fw-bold fs-3'>20+</h6><span className='lead'>Ongoing Projects</span>

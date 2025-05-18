@@ -1,4 +1,4 @@
-import { Road, Sustain } from "../assets/icons";
+import React from 'react';
 
 function PageFooter() {
 
@@ -25,7 +25,7 @@ function PageFooter() {
                             <div>
                                 <h6>Office Hours</h6>
                                 <p className="fw-light">
-                                    Monday-Friday 08:00 am to 05:00 pm
+                                    {/* council.hours ||  */"Monday-Friday 08:00 am to 05:00 pm"}
                                 </p>
                             </div>
                         </div>
@@ -36,7 +36,7 @@ function PageFooter() {
                             <div>
                                 <h6>Our Address</h6>
                                 <p className="fw-light">
-                                    Rue Njoh-Njoh, Bonapriso
+                                    {/* council.location ||  */"Bonanjo"}
                                 </p>
                             </div>
                         </div>
@@ -46,7 +46,7 @@ function PageFooter() {
                             </div>
                             <div>
                                 <h6>Contact Us</h6>
-                                <p className="fw-light">+237 654-32-34-22</p>
+                                <p className="fw-light">{/* council.phone ||  */"+237 654-32-34-22"}</p>
                             </div>
                         </div>
                     </div>
@@ -57,15 +57,7 @@ function PageFooter() {
                 <div className="container py-5">
                     <div className="d-flex justify-content-between fw-semibold py-5 ">
                         <div className="row row-cols-12">
-                            <span className="col">
-                                Development
-                            </span>
-                            <span className="col">
-                                Community
-                            </span>
-                            <span className="col">
-                                Growth
-                            </span>
+                            <span>{/* council.name ||  */"The Urban Community of Douala"}</span>
                         </div>
                         <div className="row">
                             <span className="col">
