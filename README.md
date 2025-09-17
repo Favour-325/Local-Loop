@@ -84,13 +84,15 @@ Key endpoints (JWT protected where noted)
 
 | Method | Endpoint              | Description                             |
 | ------ | --------------------- | --------------------------------------- |
-| POST   | `/api/user/register/` | Register a new user                     |
-| POST   | `/api/token/`         | Obtain access/refresh JWT tokens        |
+| POST   | `/api/register/`      | Register a new user                     |
+| POST   | `/api/login/`         | Obtain access & refresh JWT tokens      |
 | POST   | `/api/token/refresh/` | Refresh access token                    |
+| POST   | `/api/auth/me`        | Authenticate user and get user details  |
+| GET    | `/api/council/list`   | List registered councils                |
+| POST   | `/api/requests/`      | Create a new service request (protected)|
 | GET    | `/api/projects/`      | List community projects                 |
-| POST   | `/api/requests/`      | Create a new project request (auth)     |
-| POST   | `/api/contributions/` | Contribute to a request (auth)          |
-| GET    | `/api/profile/`       | Retrieve user profile & activity (auth) |
+| POST   | `/api/contributions/` | Contribute to a project (protected)     |
+| POST   | `/api/feedback/`     | Create a feedback (protected)            |
 
 
 # Project Structure
