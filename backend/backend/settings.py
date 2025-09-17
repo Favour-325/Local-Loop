@@ -14,6 +14,11 @@ import os
 
 from pathlib import Path
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 #BASE_DIR represents the project's root directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,10 +28,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret! Critical key for cryptographic signing
-SECRET_KEY = 'django-insecure-ot($qhfg10x-k7*k(aug1$h!8hexn6iw!qz=3ymlo0=$$yy52q'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG')
 
 # Set specific domains during production
 ALLOWED_HOSTS = ["*"]
