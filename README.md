@@ -76,7 +76,7 @@ The frontend runs at http://localhost:5173 (or the port Vite chooses).
 
 # Environment Variables
 
-SECRET_KEY=your_django_secret_key
+SECRET_KEY='....'
 DEBUG=True
 
 # API Overview
